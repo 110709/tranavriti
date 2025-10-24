@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tranavriti – Restoring Balance to Humanity</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+  :root{
+    --bg1:#f7efe2;
+    --accent:#8b5e3c;
+    --accent-2:#d7b89a;
+    --text:#3b2c1a;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: 'Poppins', sans-serif;
+    background:var(--bg1);
+    color:var(--text);
+    scroll-behavior:smooth;
+  }
+
+  header{
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:white;
+    text-align:center;
+    padding:80px 20px;
+    border-radius:0 0 40px 40px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.3);
+  }
+  header h1{font-size:3rem; margin:0 0 8px 0}
+  header p{font-size:1.2rem; margin:0}
+  .nav-buttons{margin-top:22px}
+  .nav-buttons a{
+    text-decoration:none;color:#fff;background:#6b4226;padding:10px 18px;border-radius:25px;margin:5px;display:inline-block;
+    transition:0.25s;
+  }
+  .nav-buttons a:hover{background:#ffb347;color:var(--text)}
+
+  section{padding:60px 10%; text-align:center}
+  h2{color:#5a3d2b;margin-bottom:18px;font-size:2rem}
+
+  .story{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+  .story div{
+    background:#fff9f2;padding:20px;border-radius:20px;box-shadow:0 4px 10px rgba(0,0,0,0.1);transition:0.25s;
+  }
+  .story div:hover{transform:scale(1.03)}
+
+  canvas{max-width:420px;margin:18px auto;background:#fff;padding:16px;border-radius:14px}
+
+  .donate-options{display:flex;justify-content:center;flex-wrap:wrap;gap:18px;margin-top:12px}
+  .option{
+    background:#fff;border:2px solid var(--accent);padding:18px;border-radius:15px;width:200px;cursor:pointer;transition:.25s;
+  }
+  .option:hover{background:var(--accent);color:#fff;transform:translateY(-6px)}
+
+  /* form & table/map areas */
+  .two-column{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:24px;
+    align-items:start;
+  }
+  @media (max-width:900px){ .two-column{grid-template-columns:1fr} }
+
+  form{
+    background:#fff;border-radius:16px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,0.12);
+  }
+  input, textarea, select{
+    width:100%;padding:10px;margin:10px 0;border:1px solid #d8c7b1;border-radius:8px;font-size:1rem;background:#fffaf3;
+  }
+  button{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:20px;cursor:pointer;font-weight:600}
+  button:hover{background:#ffb347;color:var(--text)}
+
+  /* donations table */
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+  th,td{padding:12px;text-align:left;border-bottom:1px solid #eee}
+  th{background:var(--accent);color:#fff}
+  tr:hover{background:#fff4ea;cursor:pointer}
+
+  /* map */
+  #map{height:360px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.12)}
+
+  footer{
+    background:var(--accent);color:#fff;padding:18px;text-align:center;border-radius:20px 20px 0 0;margin-top:30px;
+  }
+
+  .small-note{font-size:0.95rem;color:#5b4536;margin-top:8px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Tranavriti</h1>
+  <p>Restoring Balance to Humanity</p>
+  <div class="nav-buttons">
+    <a href="#about">About</a>
+    <a href="#survey">Survey</a>
+    <a href="#donate">Donate</a>
+    <a href="#view">View Donations</a>
+  </div>
+</header>
+
+<section id="about">
+  <h2>Our Journey</h2>
+  <div class="story">
+    <div>
+      <h3>Kshudha Nirvriti</h3>
+      <p>Our initiative began with <strong>Kshudha Nirvriti</strong>, focused on reducing hunger by redistributing leftover food to those in need.</p>
+    </div>
+    <div>
+      <h3>Evolution to Tranavriti</h3>
+      <p>After seeing the devastating floods and growing need across India, we expanded to include clothing, Medicines and other essentials — and Tranavriti was born.</p>
+    </div>
+    <div>
+      <h3>Why Tranavriti?</h3>
+      <p>The name blends <em>“Trana” (relief)</em> and <em>“Nirvriti” (peace)</em> — symbolising shelter, comfort and collective care.</p>
+    </div>
+  </div>
+</section>
+
+<section id="survey">
+  <h2>Survey Insights</h2>
+  <p>57.9% of our respondents said they do not reuse leftover food — Tranavriti aims to change that by making donating simple and local.</p>
+
+  <canvas id="donationChart"></canvas>
+  <canvas id="floodChart"></canvas>
+</section>
+
+<section id="donate">
+  <h2>Donate Essentials</h2>
+
+  <div class="donate-options">
+    <div class="option" onclick="selectItem('Food')">🍱 Food</div>
+    <div class="option" onclick="selectItem('Clothes')">👕 Clothes</div>
+    <div class="option" onclick="selectItem('Medicines')">🛏️ Medicines</div>
+  </div>
+
+  <div class="two-column" style="margin-top:20px;">
+    <!-- left: form -->
+    <div>
+      <form id="donationForm">
+        <h3 id="selectedType">Select a donation type</h3>
+        <select id="item_type" required>
+          <option value="">-- Choose category --</option>
+          <option value="Food">Food</option>
+          <option value="Clothes">Clothes</option>
+          <option value="Medicines">Medicines</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <input id="item_name" placeholder="Item name (e.g., Rice packets)" required />
+        <input id="quantity" placeholder="Quantity (e.g., 10 plates / 3 shirts)" required />
+        <input id="map_link" placeholder="Google Maps link (share location) (required)" required />
+        <input id="contact" placeholder="Contact (phone/email)" required />
+        <textarea id="additional_info" placeholder="Additional info (optional)"></textarea>
+
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:8px;">
+          <button type="submit">Submit Donation</button>
+        </div>
+        <p class="small-note">Tip: In Google Maps, tap 'Share' → 'Copy link' and paste the link above.</p>
+      </form>
+    </div>
+
+    <!-- right: table + map -->
+    <div>
+      <h3 style="margin-bottom:10px">Available Donations</h3>
+
+      <table id="donationTable" aria-live="polite">
+        <thead>
+          <tr><th>Item</th><th>Location</th><th>Contact</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div id="map" style="margin-top:16px;"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 Tranavriti | Created with love</p>
+</footer>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+/* ---------- sample charts (visual only) ---------- */
+const ctx1 = document.getElementById('donationChart');
+new Chart(ctx1, {
+  type: 'pie',
+  data: {
+    labels: ['Food','Clothes','Medicines'],
+    datasets:[{
+      data:[58,30,12],
+      backgroundColor:['#d79b62','#8b5e3c','#ffcf94']
+    }]
+  },
+  options:{plugins:{legend:{position:'bottom'}}}
+});
+
+const ctx2 = document.getElementById('floodChart');
+new Chart(ctx2, {
+  type:'bar',
+  data:{
+    labels:['2021','2022','2023','2024'],
+    datasets:[{ label:'Flood-affected families (millions)', data:[1.2,1.5,2.8,3.1], backgroundColor:'#8b5e3c' }]
+  },
+  options:{scales:{y:{beginAtZero:true}}}
+});
+
+/* ---------- SheetDB integration (your provided URL) ---------- */
+const API_URL = "https://sheetdb.io/api/v1/3u71bnncclds7";
+
+/* helper to read flexible field names (handles both "Item Name" and "item_name") */
+function field(obj, ...names){
+  for(const n of names) if(obj[n] !== undefined) return obj[n];
+  return "";
+}
+
+/* Leaflet map init (single instance reused) */
+const map = L.map('map', { preferCanvas: true }).setView([20.5937, 78.9629], 5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+}).addTo(map);
+
+let markersGroup = L.layerGroup().addTo(map);
+
+/* submit donation to SheetDB */
+document.getElementById('donationForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const payload = {
+    data: [{
+      "Item Name": document.getElementById('item_name').value,
+      "Quantity": document.getElementById('quantity').value,
+      "Map Link": document.getElementById('map_link').value,
+      "Contact": document.getElementById('contact').value,
+      "Additional Info": document.getElementById('additional_info').value || "",
+      "Status": "Available",
+      "Category": document.getElementById('item_type').value
+    }]
+  };
+
+  // POST to SheetDB
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    if(!res.ok) throw new Error('Failed to submit');
+    alert('🎉 Donation added successfully!');
+    e.target.reset();
+    document.getElementById('selectedType').innerText = "Select a donation type";
+    loadDonations(); // refresh
+  } catch(err){
+    console.error(err);
+    alert('Error submitting donation — check console and SheetDB URL.');
+  }
+});
+
+/* load donations: GET, render table, create markers */
+async function loadDonations(){
+  try {
+    const resp = await fetch(API_URL);
+    if(!resp.ok) throw new Error('Could not fetch donations');
+    const data = await resp.json();
+    // clear table & markers
+    const tbody = document.querySelector('#donationTable tbody');
+    tbody.innerHTML = '';
+    markersGroup.clearLayers();
+
+    // normalize: API returns array of rows
+    // filter out claimed items if sheet has Status column
+    const rows = data.filter(r => {
+      const s = field(r, 'Status', 'status') || '';
+      return s.toLowerCase() !== 'claimed';
+    });
+
+    // keep a mapping from table row -> marker
+    const tableToMarker = [];
+
+    // reverse so newest appear on top
+    rows.reverse().forEach((row, idx) => {
+      const item = field(row, 'Item Name', 'item_name', 'item') || 'Unknown';
+      const quantity = field(row, 'Quantity', 'quantity') || '';
+      const mapLink = field(row, 'Map Link', 'map_link', 'map') || '#';
+      const contact = field(row, 'Contact', 'contact') || '';
+      const extra = field(row, 'Additional Info', 'additional_info') || '';
+      const category = field(row, 'Category', 'category') || '';
+
+      // create table row
+      const tr = document.createElement('tr');
+      const itemTd = document.createElement('td');
+      itemTd.textContent = `${item}${quantity ? ' — ' + quantity : ''}`;
+      const mapTd = document.createElement('td');
+      mapTd.innerHTML = mapLink && mapLink !== '#' ? `<a href="${mapLink}" target="_blank">View Map</a>` : 'No link';
+      const contactTd = document.createElement('td');
+      // make phone clickable if looks like phone
+      if(contact && (contact.match(/\d{6,}/))) {
+        contactTd.innerHTML = `<a href="tel:${contact}">${contact}</a>`;
+      } else {
+        contactTd.textContent = contact;
+      }
+
+      tr.appendChild(itemTd); tr.appendChild(mapTd); tr.appendChild(contactTd);
+      tbody.appendChild(tr);
+
+      // create marker if coords extractable
+      const coords = extractCoords(mapLink);
+      let marker = null;
+      if(coords){
+        marker = L.marker(coords).addTo(markersGroup).bindPopup(`<b>${item}</b><br>${category || ''}<br>${quantity || ''}<br>${contact || ''}`);
+      }
+
+      // when table row clicked -> open marker popup and pan
+      tr.addEventListener('click', () => {
+        if(marker){
+          map.setView(marker.getLatLng(), 14, {animate:true});
+          marker.openPopup();
+        } else {
+          // if no coords, just open the map link
+          if(mapLink && mapLink !== '#') window.open(mapLink, '_blank');
+        }
+      });
+    });
+
+  } catch (err) {
+    console.error('Load error', err);
+    // show a friendly message in table
+    const tbody = document.querySelector('#donationTable tbody');
+    tbody.innerHTML = `<tr><td colspan="3">Unable to load donations right now.</td></tr>`;
+  }
+}
+
+/* extract lat/lng from common google maps link formats:
+   - contains @lat,lng
+   - contains /place/.../@lat,lng,...
+   - maps.google.com/?q=lat,lng
+*/
+function extractCoords(url){
+  if(!url) return null;
+  try {
+    // pattern for @lat,lng
+    let m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if(m) return [parseFloat(m[1]), parseFloat(m[2])];
+
+    // pattern for q=lat,lng
+    m = url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if(m) return [parseFloat(m[1]), parseFloat(m[2])];
+
+    // sometimes the URL ends with /data=!3m1!4b1!4m5!3m4! etc — there can be lat,lng in the path
+    m = url.match(/\/(-?\d+\.\d+),(-?\d+\.\d+)(?:,|\/|$)/);
+    if(m) return [parseFloat(m[1]), parseFloat(m[2])];
+
+    return null;
+  } catch(e){ return null; }
+}
+
+/* select item quick helper */
+function selectItem(type){
+  document.getElementById('item_type').value = type;
+  document.getElementById('selectedType').innerText = `Donating: ${type}`;
+}
+
+/* initial load */
+loadDonations();
+</script>
+
+</body>
+</html>
