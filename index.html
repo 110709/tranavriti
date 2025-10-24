@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
+  <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Tranavriti – Restoring Balance to Humanity</title>
 
@@ -13,9 +13,13 @@
 
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-<style>
-  :root{
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tranavriti</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
     --bg1:#f7efe2;
     --accent:#8b5e3c;
     --accent-2:#d7b89a;
@@ -72,42 +76,120 @@
     align-items:start;
   }
   @media (max-width:900px){ .two-column{grid-template-columns:1fr} }
-
-  form{
-    background:#fff;border-radius:16px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,0.12);
-  }
-  input, textarea, select{
-    width:100%;padding:10px;margin:10px 0;border:1px solid #d8c7b1;border-radius:8px;font-size:1rem;background:#fffaf3;
-  }
-  button{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:20px;cursor:pointer;font-weight:600}
-  button:hover{background:#ffb347;color:var(--text)}
-
-  /* donations table */
-  table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
-  th,td{padding:12px;text-align:left;border-bottom:1px solid #eee}
-  th{background:var(--accent);color:#fff}
-  tr:hover{background:#fff4ea;cursor:pointer}
-
-  /* map */
-  #map{height:360px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.12)}
-
-  footer{
-    background:var(--accent);color:#fff;padding:18px;text-align:center;border-radius:20px 20px 0 0;margin-top:30px;
-  }
-
-  .small-note{font-size:0.95rem;color:#5b4536;margin-top:8px}
-</style>
+    .info-box {
+      background: rgb(215, 178, 126);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px;
+      flex: 1 1 300px;
+      max-width: 400px;
+      transition: transform 0.3s ease;
+    }
+    .info-box:hover {
+      transform: translateY(-5px);
+    }
+    .info-box h3 {
+      margin-top: 0;
+      color: var(--accent);
+    }
+    .donation-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    form, .donation-data {
+      background: rgb(188, 155, 108);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      flex: 1 1 400px;
+      max-width: 600px;
+    }
+    label {
+      font-weight: 600;
+      margin-top: 10px;
+      display: block;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+    }
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 1em;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: var(--primary);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: var(--primary);
+      color: white;
+    }
+    iframe {
+      width: 100%;
+      height: 250px;
+      border: 0;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--accent);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      z-index: 1000;
+    }
+    .toast.show {
+      opacity: 1;
+    }
+    @media (max-width: 768px) {
+      .info-boxes, .donation-container {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<header>
+  
+
+  <header>
   <h1>Tranavriti</h1>
   <p>Restoring Balance to Humanity</p>
   <div class="nav-buttons">
     <a href="#about">About</a>
     <a href="#survey">Survey</a>
     <a href="#donate">Donate</a>
-    <a href="#view">View Donations</a>
+    <a href="#donationTable">View Donations</a>
   </div>
 </header>
 
@@ -136,7 +218,6 @@
   <canvas id="donationChart"></canvas>
   <canvas id="floodChart"></canvas>
 </section>
-
 <section id="donate">
   <h2>Donate Essentials</h2>
 
@@ -146,237 +227,124 @@
     <div class="option" onclick="selectItem('Medicines')">🛏️ Medicines</div>
   </div>
 
-  <div class="two-column" style="margin-top:20px;">
-    <!-- left: form -->
-    <div>
+  <section id="donate">
+    <h2 style="text-align:center;">Submit a Donation</h2>
+    <div class="donation-container">
       <form id="donationForm">
-        <h3 id="selectedType">Select a donation type</h3>
-        <select id="item_type" required>
-          <option value="">-- Choose category --</option>
+        <label>Donation Type</label>
+        <select name="item_type" required>
           <option value="Food">Food</option>
-          <option value="Clothes">Clothes</option>
-          <option value="Medicines">Medicines</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Medicine">Medicine</option>
           <option value="Other">Other</option>
         </select>
 
-        <input id="item_name" placeholder="Item name (e.g., Rice packets)" required />
-        <input id="quantity" placeholder="Quantity (e.g., 10 plates / 3 shirts)" required />
-        <input id="map_link" placeholder="Google Maps link (share location) (required)" required />
-        <input id="contact" placeholder="Contact (phone/email)" required />
-        <textarea id="additional_info" placeholder="Additional info (optional)"></textarea>
+        <label>Item Name</label>
+        <input type="text" name="item_name" placeholder="e.g. Rice" required />
 
-        <div style="display:flex;gap:12px;justify-content:center;margin-top:8px;">
-          <button type="submit">Submit Donation</button>
-        </div>
-        <p class="small-note">Tip: In Google Maps, tap 'Share' → 'Copy link' and paste the link above.</p>
+        <label>Quantity</label>
+        <input type="text" name="quantity" placeholder="e.g. 10 plates" required />
+
+        <label>Location (Google Maps link)</label>
+        <input type="url" name="map_link" placeholder="https://maps.google.com/..." required />
+
+        <label>Contact Number</label>
+        <input type="text" name="contact" placeholder="e.g. 9302409211" required />
+
+        <label>Additional Info</label>
+        <textarea name="additional_info" rows="3" placeholder="Optional notes..."></textarea>
+
+        <button type="submit">Submit Donation</button>
       </form>
+
+    <div class="donation-data">
+        <h3>Available Donations</h3>
+        <table id="donationTable">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Quantity</th>
+              <th>Location</th>
+              <th>Contact</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <h3 style="margin-top:20px;">Latest Donation Location</h3>
+        <iframe id="mapFrame"
+           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.902332978295!2d78.3612!3d17.3854!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb93f3e6e6e6e7%3A0x809325063087877572!2sPeerancheru%2C%20Hyderabad%2C%20Telangana!5e0!3m2!1sen!2sin!4v1700000000000"
+           width="100%" height="250" style="border:0; border-radius:8px;" allowfullscreen loading="lazy">
+        </iframe>
+      </div>
     </div>
+  </section>
 
-    <!-- right: table + map -->
-    <div>
-      <h3 style="margin-bottom:10px">Available Donations</h3>
+  <div class="toast" id="toast">✅ Donation submitted successfully!</div>
 
-      <table id="donationTable" aria-live="polite">
-        <thead>
-          <tr><th>Item</th><th>Location</th><th>Contact</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+  <script>
+  const API_URL = "https://sheetdb.io/api/v1/lctrxtu47umvy";
+  const toast = document.getElementById("toast");
 
-      <div id="map" style="margin-top:16px;"></div>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <p>© 2025 Tranavriti | Created with love</p>
-</footer>
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-/* ---------- sample charts (visual only) ---------- */
-const ctx1 = document.getElementById('donationChart');
-new Chart(ctx1, {
-  type: 'pie',
-  data: {
-    labels: ['Food','Clothes','Medicines'],
-    datasets:[{
-      data:[58,30,12],
-      backgroundColor:['#d79b62','#8b5e3c','#ffcf94']
-    }]
-  },
-  options:{plugins:{legend:{position:'bottom'}}}
-});
-
-const ctx2 = document.getElementById('floodChart');
-new Chart(ctx2, {
-  type:'bar',
-  data:{
-    labels:['2021','2022','2023','2024'],
-    datasets:[{ label:'Flood-affected families (millions)', data:[1.2,1.5,2.8,3.1], backgroundColor:'#8b5e3c' }]
-  },
-  options:{scales:{y:{beginAtZero:true}}}
-});
-
-/* ---------- SheetDB integration (your provided URL) ---------- */
-const API_URL = "https://sheetdb.io/api/v1/3u71bnncclds7";
-
-/* helper to read flexible field names (handles both "Item Name" and "item_name") */
-function field(obj, ...names){
-  for(const n of names) if(obj[n] !== undefined) return obj[n];
-  return "";
-}
-
-/* Leaflet map init (single instance reused) */
-const map = L.map('map', { preferCanvas: true }).setView([20.5937, 78.9629], 5);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-}).addTo(map);
-
-let markersGroup = L.layerGroup().addTo(map);
-
-/* submit donation to SheetDB */
-document.getElementById('donationForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const payload = {
-    data: [{
-      "Item Name": document.getElementById('item_name').value,
-      "Quantity": document.getElementById('quantity').value,
-      "Map Link": document.getElementById('map_link').value,
-      "Contact": document.getElementById('contact').value,
-      "Additional Info": document.getElementById('additional_info').value || "",
-      "Status": "Available",
-      "Category": document.getElementById('item_type').value
-    }]
-  };
-
-  // POST to SheetDB
-  try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(payload)
-    });
-    if(!res.ok) throw new Error('Failed to submit');
-    alert('🎉 Donation added successfully!');
-    e.target.reset();
-    document.getElementById('selectedType').innerText = "Select a donation type";
-    loadDonations(); // refresh
-  } catch(err){
-    console.error(err);
-    alert('Error submitting donation — check console and SheetDB URL.');
+  // Show toast notification
+  function showToast() {
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 3000);
   }
-});
 
-/* load donations: GET, render table, create markers */
-async function loadDonations(){
-  try {
-    const resp = await fetch(API_URL);
-    if(!resp.ok) throw new Error('Could not fetch donations');
-    const data = await resp.json();
-    // clear table & markers
-    const tbody = document.querySelector('#donationTable tbody');
-    tbody.innerHTML = '';
-    markersGroup.clearLayers();
+  // Submit donation
+  document.getElementById("donationForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = {};
+    formData.forEach((value, key) => data[key] = value);
 
-    // normalize: API returns array of rows
-    // filter out claimed items if sheet has Status column
-    const rows = data.filter(r => {
-      const s = field(r, 'Status', 'status') || '';
-      return s.toLowerCase() !== 'claimed';
-    });
+    try {
+      await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data })
+      });
+      e.target.reset();
+      showToast();
+      loadDonations();
+    } catch (error) {
+      console.error("Submission failed:", error);
+    }
+  });
 
-    // keep a mapping from table row -> marker
-    const tableToMarker = [];
+  // Load donations and update table + map
+  async function loadDonations() {
+    try {
+      const res = await fetch(API_URL);
+      const donations = await res.json();
+      const tbody = document.querySelector("#donationTable tbody");
+      const mapFrame = document.getElementById("mapFrame");
+      tbody.innerHTML = "";
 
-    // reverse so newest appear on top
-    rows.reverse().forEach((row, idx) => {
-      const item = field(row, 'Item Name', 'item_name', 'item') || 'Unknown';
-      const quantity = field(row, 'Quantity', 'quantity') || '';
-      const mapLink = field(row, 'Map Link', 'map_link', 'map') || '#';
-      const contact = field(row, 'Contact', 'contact') || '';
-      const extra = field(row, 'Additional Info', 'additional_info') || '';
-      const category = field(row, 'Category', 'category') || '';
+      donations.reverse().forEach((d, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${d.item_name || "Unknown"}</td>
+          <td>${d.quantity || "-"}</td>
+          <td>${d.map_link ? `<a href="${d.map_link}" target="_blank">View Map</a>` : "No link"}</td>
+          <td>${d.contact || "-"}</td>
+        `;
+        tbody.appendChild(row);
 
-      // create table row
-      const tr = document.createElement('tr');
-      const itemTd = document.createElement('td');
-      itemTd.textContent = `${item}${quantity ? ' — ' + quantity : ''}`;
-      const mapTd = document.createElement('td');
-      mapTd.innerHTML = mapLink && mapLink !== '#' ? `<a href="${mapLink}" target="_blank">View Map</a>` : 'No link';
-      const contactTd = document.createElement('td');
-      // make phone clickable if looks like phone
-      if(contact && (contact.match(/\d{6,}/))) {
-        contactTd.innerHTML = `<a href="tel:${contact}">${contact}</a>`;
-      } else {
-        contactTd.textContent = contact;
-      }
-
-      tr.appendChild(itemTd); tr.appendChild(mapTd); tr.appendChild(contactTd);
-      tbody.appendChild(tr);
-
-      // create marker if coords extractable
-      const coords = extractCoords(mapLink);
-      let marker = null;
-      if(coords){
-        marker = L.marker(coords).addTo(markersGroup).bindPopup(`<b>${item}</b><br>${category || ''}<br>${quantity || ''}<br>${contact || ''}`);
-      }
-
-      // when table row clicked -> open marker popup and pan
-      tr.addEventListener('click', () => {
-        if(marker){
-          map.setView(marker.getLatLng(), 14, {animate:true});
-          marker.openPopup();
-        } else {
-          // if no coords, just open the map link
-          if(mapLink && mapLink !== '#') window.open(mapLink, '_blank');
+        // Update map to latest donation
+        if (index === 0 && d.map_link) {
+          const embedURL = d.map_link.includes("embed")
+            ? d.map_link
+            : d.map_link.replace("/maps?", "/maps/embed?");
+          mapFrame.src = embedURL;
         }
       });
-    });
-
-  } catch (err) {
-    console.error('Load error', err);
-    // show a friendly message in table
-    const tbody = document.querySelector('#donationTable tbody');
-    tbody.innerHTML = `<tr><td colspan="3">Unable to load donations right now.</td></tr>`;
+    } catch (error) {
+      console.error("Failed to load donations:", error);
+    }
   }
-}
 
-/* extract lat/lng from common google maps link formats:
-   - contains @lat,lng
-   - contains /place/.../@lat,lng,...
-   - maps.google.com/?q=lat,lng
-*/
-function extractCoords(url){
-  if(!url) return null;
-  try {
-    // pattern for @lat,lng
-    let m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-    if(m) return [parseFloat(m[1]), parseFloat(m[2])];
-
-    // pattern for q=lat,lng
-    m = url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
-    if(m) return [parseFloat(m[1]), parseFloat(m[2])];
-
-    // sometimes the URL ends with /data=!3m1!4b1!4m5!3m4! etc — there can be lat,lng in the path
-    m = url.match(/\/(-?\d+\.\d+),(-?\d+\.\d+)(?:,|\/|$)/);
-    if(m) return [parseFloat(m[1]), parseFloat(m[2])];
-
-    return null;
-  } catch(e){ return null; }
-}
-
-/* select item quick helper */
-function selectItem(type){
-  document.getElementById('item_type').value = type;
-  document.getElementById('selectedType').innerText = `Donating: ${type}`;
-}
-
-/* initial load */
-loadDonations();
+  // Initial load
+  loadDonations();
 </script>
-
-</body>
-</html>
